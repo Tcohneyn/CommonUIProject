@@ -7,7 +7,12 @@
 		{
 			"Name": "CommonUIProject",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine",
+				"CommonUI",
+				"DeveloperSettings"
+			]
 		}
 	],
 	"Plugins": [

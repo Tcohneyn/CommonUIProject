@@ -1,0 +1,19 @@
+// Tcohneyn All Rights Reserved
+
+#pragma once
+
+#include "NativeGameplayTags.h"
+
+namespace FrontendGameplayTags
+{
+	//Frontend widget stack
+	COMMONUIPROJECT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Frontend_WidgetStack_Modal);
+	COMMONUIPROJECT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Frontend_WidgetStack_GameMenu);
+	COMMONUIPROJECT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Frontend_WidgetStack_GameHud);
+	COMMONUIPROJECT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Frontend_WidgetStack_Frontend);
+
+	//Frontend widgets
+	COMMONUIPROJECT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Frontend_Widget_PressAnyKeyScreen);
+	COMMONUIPROJECT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Frontend_Widget_MainMenuScreen);
+	COMMONUIPROJECT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Frontend_Widget_OptionsScreen);
+}
