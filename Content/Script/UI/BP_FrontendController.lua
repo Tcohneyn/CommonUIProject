@@ -26,7 +26,7 @@ function M:ReceivePossess(aPawn)
                 WidgetStackTag,
                 true)
             Task.OnWidgetCreatedBeforePush:Add(self, M.OnEventReceived)
-            Task.OnWidgetCreatedBeforePush:Add(self, M.OnEventReceived)
+            --Task.OnWidgetCreatedBeforePush:Add(self, M.OnEventReceived)
             Task:Activate()
         else
             print("Failed to load WidgetClass")

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FrontendTypes/FrontendEnumTypes.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "FrontendUISubsystem.generated.h"
 
@@ -15,6 +16,7 @@ enum class EAsyncPushWidgetState : uint8
 	OnCreatedBeforePush,
 	AfterPush
 };
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnButtonDescriptionTextUpdatedDelegate,UFrontendCommonButtonBase*,BroadcastingButton,FText,DescriptionText);
 /**
  * 
  */
@@ -34,6 +36,10 @@ public:
 	void RegisterCreatedPrimaryLayoutWidget(UWidget_PrimaryLayout* InCreatedWidget);
 
 	void PushSoftWidgetToStackAsync(const FGameplayTag& InWidgetStackTag,TSoftClassPtr<UWidget_ActivatableBase> InSoftWidgetClass,TFunction<void(EAsyncPushWidgetState,UWidget_ActivatableBase*)> AysncPushStateCallback);
+    void PushConfirmScreenToModalStackAynsc(EConfirmScreenType InScreenType,const FText& InScreenTitle,const FText& InScreenMsg,TFunction<void(EConfirmScreenButtonType)>ButtonClickedCallback);
+	
+	UPROPERTY(BlueprintAssignable)
+	FOnButtonDescriptionTextUpdatedDelegate OnButtonDescriptionTextUpdated;
 private:
 	UPROPERTY(Transient)
 	UWidget_PrimaryLayout* CreatedPrimaryLayout;
