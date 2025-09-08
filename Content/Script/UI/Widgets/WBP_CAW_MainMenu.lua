@@ -22,6 +22,11 @@ function M:Construct()
     else
         print("[Lua] Story button is nil!")
     end
+        if self.Button_Option then
+        self.Button_Option.OnButtonBaseClicked:Add(self, M.OnButtonClicked_Option)
+    else
+        print("[Lua] Story button is nil!")
+    end
 end
 
 -- Quit 按钮
@@ -62,13 +67,41 @@ end
 
 -- Story 按钮
 function M:OnButtonClicked_Story()
-    print("[Lua] Story button clicked")
 
     local OwningPC = self:GetOwningFrontendPlayerController()
-    print("[Lua] OwningPC = " .. tostring(OwningPC))
+    --print("[Lua] OwningPC = " .. tostring(OwningPC))
 
     local WidgetClass = UE.UFrontendFunctionLibrary.GetFrontendSoftWidgetClassByTag(self.InWidgetTag)
-    print("[Lua] WidgetClass = " .. tostring(WidgetClass))
+    --print("[Lua] WidgetClass = " .. tostring(WidgetClass))
+
+    if WidgetClass then
+        local Task = UE.UAsyncAction_PushSoftWidget.PushSoftWidget(
+            self,
+            OwningPC,
+            WidgetClass,
+            self.InWidgetStackTag,
+            true
+        )
+        if Task then
+            print("[Lua] Soft widget task created")
+            Task.OnWidgetCreatedBeforePush:Add(self, M.OnWidgetPushed)
+            Task:Activate()
+        else
+            print("[Lua] Failed to create push soft widget task")
+        end
+    else
+        print("[Lua] Failed to load WidgetClass for Story")
+    end
+end
+
+-- Options 按钮
+function M:OnButtonClicked_Option()
+
+    local OwningPC = self:GetOwningFrontendPlayerController()
+    --print("[Lua] OwningPC = " .. tostring(OwningPC))
+
+    local WidgetClass = UE.UFrontendFunctionLibrary.GetFrontendSoftWidgetClassByTag(self.InWidgetTag1)
+    --print("[Lua] WidgetClass = " .. tostring(WidgetClass))
 
     if WidgetClass then
         local Task = UE.UAsyncAction_PushSoftWidget.PushSoftWidget(

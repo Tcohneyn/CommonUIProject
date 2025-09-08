@@ -102,7 +102,7 @@ void UFrontendUISubsystem::PushConfirmScreenToModalStackAynsc(EConfirmScreenType
 		FrontendGameplayTags::Frontend_WidgetStack_Modal,
 		UFrontendFunctionLibrary::GetFrontendSoftWidgetClassByTag(FrontendGameplayTags::Frontend_Widget_ConfirmScreen),
 		[CreatedInfoObject,ButtonClickedCallback]
-		(EAsyncPushWidgetState InPushState,UWidget_ActivatableBase* PushedWidget)
+	(EAsyncPushWidgetState InPushState, UWidget_ActivatableBase* PushedWidget)
 		{
 			if (InPushState == EAsyncPushWidgetState::OnCreatedBeforePush)
 			{
