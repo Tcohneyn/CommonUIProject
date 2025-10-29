@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FrontendTypes/FrontendEnumTypes.h"
 #include "UObject/NoExportTypes.h"
 #include "ListDataObject_Base.generated.h"
 
@@ -12,11 +13,13 @@ void Set##PropertyName(DataType In##PropertyName) { PropertyName = In##PropertyN
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract)
 class COMMONUIPROJECT_API UListDataObject_Base : public UObject
 {
 	GENERATED_BODY()
 public:
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnListDataModifiedDelegate,UListDataObject_Base*,EOptionsListDataModifyReason)
+    FOnListDataModifiedDelegate OnListDataModified;
 	LIST_DATA_ACCESSOR(FName,DataID)
 	LIST_DATA_ACCESSOR(FText,DataDisplayName)
 	LIST_DATA_ACCESSOR(FText,DescriptionRichText)
@@ -29,10 +32,17 @@ public:
 	virtual TArray<UListDataObject_Base*> GetAllChildListData() const { return TArray<UListDataObject_Base*>();}
 	virtual bool HasAnyChildListData() const { return false;}
 
+	void SetShouldApplySettingsImmediately(bool bShouldApplyRightAway) { bShouldApplyChangeImmediatly = bShouldApplyRightAway;}
+
+	//子类应重写这些方法，以提供重置数据的实现。
+	virtual bool HasDefaultValue() const { return false;}
+	virtual bool CanResetBackToDefaultValue() const { return false;}
+	virtual bool TryResetBackToDefaultValue() { return false;}
 protected:
 	//基类中此方法为空。子类应重写此方法，以实现所需的特定初始化逻辑。
 	virtual void OnDataObjectInitialized();
 
+	virtual void NotifyListDataModified(UListDataObject_Base* ModifiedData,EOptionsListDataModifyReason ModifyReason = EOptionsListDataModifyReason::DirectlyModified);
 private:
 	FName DataID;
 	FText DataDisplayName;
@@ -42,4 +52,6 @@ private:
 
 	UPROPERTY(Transient)
 	UListDataObject_Base* ParentData;
+
+	bool bShouldApplyChangeImmediatly = false;
 };
