@@ -4,12 +4,24 @@
 #include "FrontendFunctionLibrary.h"
 #include "FrontendSettings/FrontendDeveloperSettings.h"
 
-TSoftClassPtr<UWidget_ActivatableBase> UFrontendFunctionLibrary::GetFrontendSoftWidgetClassByTag(UPARAM(meta = (Categories = "Frontend.Widget")) FGameplayTag InWidgetTag)
+// 函数功能：通过游戏标签获取前端控件类的软引用
+// 此函数标记为BlueprintPure，意味着它是纯函数（无副作用），可在蓝图中作为纯节点使用
+TSoftClassPtr<UWidget_ActivatableBase> UFrontendFunctionLibrary::GetFrontendSoftWidgetClassByTag(
+	UPARAM(meta = (Categories = "Frontend.Widget")) FGameplayTag InWidgetTag) // UPARAM元数据限制在蓝图中只能选择"Frontend.Widget"分类下的标签
 {	
+	// 获取前端开发者设置的默认实例（单例模式）
+	// GetDefault是UE提供的模板函数，用于获取UDeveloperSettings派生类的配置实例
 	const UFrontendDeveloperSettings* FrontendDeveloperSettings = GetDefault<UFrontendDeveloperSettings>();
 
-	checkf(FrontendDeveloperSettings->FrontendWidgetMap.Contains(InWidgetTag),TEXT("Could not find the corresponding widget under the tag %s"),*InWidgetTag.ToString());
+	// 安全检查：使用checkf宏验证传入的标签是否在映射表中存在
+	// 如果标签不存在，在开发版本中会触发断言错误并输出详细消息，帮助快速定位问题
+	// %s由InWidgetTag.ToString()填充，显示具体的错误标签名
+	checkf(FrontendDeveloperSettings->FrontendWidgetMap.Contains(InWidgetTag),
+		   TEXT("Could not find the corresponding widget under the tag %s"), 
+		   *InWidgetTag.ToString());
 
+	// 使用FindRef方法从映射表中查找并返回对应的软引用
+	// FindRef在键存在时返回对应值，不存在时返回空值（但上方的checkf已确保存在性）
 	return FrontendDeveloperSettings->FrontendWidgetMap.FindRef(InWidgetTag);
 }
 

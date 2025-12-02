@@ -215,3 +215,53 @@ bool UListDataObject_String::TrySetDisplayTextFromStringValue(const FString& InS
 	// 如果未找到匹配项或索引无效，返回 false 表示设置失败
 	return false;
 }
+
+//************ UListDataObject_StringBool ************//
+
+void UListDataObject_StringBool::OverrideTrueDisplayText(const FText& InNewTrueDisplayText)
+{
+	if (!AvailableOptionsStringArray.Contains(TrueString))
+	{
+		AddDynamicOption(TrueString,InNewTrueDisplayText);
+	}
+}
+
+void UListDataObject_StringBool::OverrideFalseDisplayText(const FText& InNewFalseDisplayText)
+{
+	if (!AvailableOptionsStringArray.Contains(FalseString))
+	{
+		AddDynamicOption(FalseString,InNewFalseDisplayText);
+	}
+}
+
+void UListDataObject_StringBool::SetTrueAsDefaultValue()
+{
+	SetDefaultValueFromString(TrueString);
+}
+
+void UListDataObject_StringBool::SetFalseAsDefaultValue()
+{
+	SetDefaultValueFromString(FalseString);
+}
+
+void UListDataObject_StringBool::OnDataObjectInitialized()
+{
+	TryInitBoolValues();
+
+	Super::OnDataObjectInitialized();
+}
+
+void UListDataObject_StringBool::TryInitBoolValues()
+{
+	if (!AvailableOptionsStringArray.Contains(TrueString))
+	{
+		AddDynamicOption(TrueString,FText::FromString(TEXT("ON")));
+	}
+
+	if (!AvailableOptionsStringArray.Contains(FalseString))
+	{
+		AddDynamicOption(FalseString,FText::FromString(TEXT("OFF")));
+	}
+}
+
+//************ UListDataObject_StringBool ************//

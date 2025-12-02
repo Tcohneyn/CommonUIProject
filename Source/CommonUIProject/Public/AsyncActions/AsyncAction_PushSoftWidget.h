@@ -33,7 +33,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnPushSoftWidgetDelegate AfterPush;
 private:
-	TWeakObjectPtr<UWorld> CachedOwningWorld;
+	TWeakObjectPtr<UWorld>  CachedOwningWorld;
 	TWeakObjectPtr<APlayerController> CachedOwningPC;
 	TSoftClassPtr<UWidget_ActivatableBase> CachedSoftWidgetClass;
 	FGameplayTag CachedWidgetStackTag;

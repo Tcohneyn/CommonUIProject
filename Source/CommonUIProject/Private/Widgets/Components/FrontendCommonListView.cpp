@@ -6,6 +6,7 @@
 #include "Widgets/Options/DataAsset_DataListEntryMapping.h"
 #include "Widgets/Options/ListEntries/Widget_ListEntry_Base.h"
 #include "Widgets/Options/DataObjects/ListDataObject_Base.h"
+#include "Widgets/Options/DataObjects/ListDataObject_Collection.h"
 
 /**
  * 核心方法：为列表中的每个数据项生成对应的可视化条目控件（Widget）。
@@ -44,6 +45,11 @@ UUserWidget& UFrontendCommonListView::OnGenerateEntryWidgetInternal(UObject* Ite
     {
         return Super::OnGenerateEntryWidgetInternal(Item,DesiredEntryClass,OwnerTable);
     }
+}
+
+bool UFrontendCommonListView::OnIsSelectableOrNavigableInternal(UObject* FirstSelectedItem)
+{
+    return !FirstSelectedItem->IsA<UListDataObject_Collection>();
 }
 
 /**

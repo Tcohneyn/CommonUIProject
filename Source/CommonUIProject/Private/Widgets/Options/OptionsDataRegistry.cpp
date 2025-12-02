@@ -9,6 +9,7 @@
 #include "Widgets/Options/DataObjects/ListDataObject_String.h"
 #include "Widgets/Options/OptionsDataInteractionHelper.h"
 #include "FrontendSettings/FrontendGameUserSettings.h"
+#include "Widgets/Options/DataObjects/ListDataObject_Scalar.h"
 
 #define MAKE_OPTIONS_DATA_CONTROL(SetterOrGetterFuncName) \
 MakeShared<FOptionsDataInteractionHelper>(GET_FUNCTION_NAME_STRING_CHECKED(UFrontendGameUserSettings,SetterOrGetterFuncName))
@@ -46,8 +47,57 @@ TArray<UListDataObject_Base*> UOptionsDataRegistry::GetListSourceItemsBySelected
 	// 解引用指针，获取实际的标签页集合对象
 	UListDataObject_Collection* FoundTabCollection = *FoundTabCollectionPtr;
 
-	// 返回该标签页集合中的所有子数据项
-	return FoundTabCollection->GetAllChildListData();
+	TArray<UListDataObject_Base*> AllChildListItems;
+
+	for (UListDataObject_Base* ChildListData : FoundTabCollection->GetAllChildListData())
+	{
+		if (!ChildListData)
+		{
+			continue;
+		}
+
+		AllChildListItems.Add(ChildListData);
+
+		if (ChildListData->HasAnyChildListData())
+		{
+			FindChildListDataRecursively(ChildListData,AllChildListItems);
+		}
+	}
+
+	return AllChildListItems;
+}
+
+void UOptionsDataRegistry::FindChildListDataRecursively(UListDataObject_Base* InParentData,
+	TArray<UListDataObject_Base*>& OutFoundChildListData) const
+{
+	// 1. 检查父数据对象和子数据
+	if (!InParentData || !InParentData->HasAnyChildListData())
+	{
+		// 如果 InParentData 为空，或者它没有子列表数据，则直接返回，终止递归
+		return;
+	}
+
+	// 2. 遍历当前父数据对象的所有直接子列表数据
+	for (UListDataObject_Base* SubChildListData : InParentData->GetAllChildListData())
+	{
+		// 3. 检查当前子列表数据是否有效
+		if (!SubChildListData)
+		{
+			// 如果子列表数据为空，则跳过当前循环，处理下一个子项
+			continue;
+		}
+
+		// 4. 将当前子列表数据添加到输出数组中
+		OutFoundChildListData.Add(SubChildListData);
+
+		// 5. 递归调用
+		if (SubChildListData->HasAnyChildListData())
+		{
+			// 如果当前子列表数据自身还有子列表数据，则以它为新的父数据对象进行递归调用
+			// 这一步是实现“深度优先”遍历的关键
+			FindChildListDataRecursively(SubChildListData,OutFoundChildListData);
+		}
+	}
 }
 
 /**
@@ -116,7 +166,117 @@ void UOptionsDataRegistry::InitAudioCollectionTab()
 	UListDataObject_Collection* AudioTabCollection = NewObject<UListDataObject_Collection>();
 	AudioTabCollection->SetDataID(FName("AudioTabCollection"));
 	AudioTabCollection->SetDataDisplayName(FText::FromString(TEXT("Audio")));
+	//音量分类
+	{
+		UListDataObject_Collection* VolumeCategoryCollection = NewObject<UListDataObject_Collection>();
+		VolumeCategoryCollection->SetDataID(FName("VolumeCategoryCollection"));
+		VolumeCategoryCollection->SetDataDisplayName(FText::FromString(TEXT("Volume")));
 
+		AudioTabCollection->AddChildListData(VolumeCategoryCollection);
+
+		//Overall Volume
+		{
+			UListDataObject_Scalar* OverallVolume = NewObject<UListDataObject_Scalar>();
+			OverallVolume->SetDataID(FName("OverallVolume"));
+			OverallVolume->SetDataDisplayName(FText::FromString(TEXT("Overall Volume")));
+			OverallVolume->SetDescriptionRichText(FText::FromString(TEXT("This is description for Overall Volume")));
+			// 设置显示值的范围：滑块在UI上显示为0%到100%
+			OverallVolume->SetDisplayValueRange(TRange<float>(0.f, 1.f));
+    
+			// 设置实际输出值的范围：内部处理时映射到0.0到2.0的范围
+			OverallVolume->SetOutputValueRange(TRange<float>(0.f, 2.f));
+    
+			// 设置滑块步长：每次调整变化0.01（1%）
+			OverallVolume->SetSliderStepSize(0.01f);
+    
+			// 设置默认值：1.0（100%音量）
+			OverallVolume->SetDefaultValueFromString(LexToString(1.f));
+    
+			// 设置显示格式为百分比（如显示50%而不是0.5）
+			OverallVolume->SetDisplayNumericType(ECommonNumericType::Percentage);
+    
+			// 设置数字格式化选项：不显示小数位（显示为50%而不是50.0%）
+			OverallVolume->SetNumberFormattingOptions(UListDataObject_Scalar::NoDecimal());
+    
+			OverallVolume->SetDataDynamicGetter(MAKE_OPTIONS_DATA_CONTROL(GetOverallVolume));
+			OverallVolume->SetDataDynamicSetter(MAKE_OPTIONS_DATA_CONTROL(SetOverallVolume));
+			OverallVolume->SetShouldApplySettingsImmediately(true);
+		
+			VolumeCategoryCollection->AddChildListData(OverallVolume);
+		}
+		//Music Volume
+		{
+			UListDataObject_Scalar* MusicVolume = NewObject<UListDataObject_Scalar>();
+			MusicVolume->SetDataID(FName("MusicVolume"));
+			MusicVolume->SetDataDisplayName(FText::FromString(TEXT("Music Volume")));
+			MusicVolume->SetDescriptionRichText(FText::FromString(TEXT("This is description for Music Volume")));
+			MusicVolume->SetDisplayValueRange(TRange<float>(0.f,1.f));
+			MusicVolume->SetOutputValueRange(TRange<float>(0.f,2.f));
+			MusicVolume->SetSliderStepSize(0.01f);
+			MusicVolume->SetDefaultValueFromString(LexToString(1.f));
+			MusicVolume->SetDisplayNumericType(ECommonNumericType::Percentage);
+			MusicVolume->SetNumberFormattingOptions(UListDataObject_Scalar::NoDecimal());  //No Decimal: 50%  //One Decimal: 50.5%
+			MusicVolume->SetDataDynamicGetter(MAKE_OPTIONS_DATA_CONTROL(GetMusicVolume));
+			MusicVolume->SetDataDynamicSetter(MAKE_OPTIONS_DATA_CONTROL(SetMusicVolume));
+			MusicVolume->SetShouldApplySettingsImmediately(true);
+
+			VolumeCategoryCollection->AddChildListData(MusicVolume);
+		}
+		//Sound FX Volume
+		{
+			UListDataObject_Scalar* SoundFXVolume = NewObject<UListDataObject_Scalar>();
+			SoundFXVolume->SetDataID(FName("SoundFXVolume"));
+			SoundFXVolume->SetDataDisplayName(FText::FromString(TEXT("Sound Effects Volume")));
+			SoundFXVolume->SetDescriptionRichText(FText::FromString(TEXT("This is description for Sound Effects Volume")));
+			SoundFXVolume->SetDisplayValueRange(TRange<float>(0.f,1.f));
+			SoundFXVolume->SetOutputValueRange(TRange<float>(0.f,2.f));
+			SoundFXVolume->SetSliderStepSize(0.01f);
+			SoundFXVolume->SetDefaultValueFromString(LexToString(1.f));
+			SoundFXVolume->SetDisplayNumericType(ECommonNumericType::Percentage);
+			SoundFXVolume->SetNumberFormattingOptions(UListDataObject_Scalar::NoDecimal());  //No Decimal: 50%  //One Decimal: 50.5%
+			SoundFXVolume->SetDataDynamicGetter(MAKE_OPTIONS_DATA_CONTROL(GetSoundFXVolume));
+			SoundFXVolume->SetDataDynamicSetter(MAKE_OPTIONS_DATA_CONTROL(SetSoundFXVolume));
+			SoundFXVolume->SetShouldApplySettingsImmediately(true);
+
+			VolumeCategoryCollection->AddChildListData(SoundFXVolume);
+		}
+		//声音目录
+		{
+			UListDataObject_Collection* SoundCategoryCollection = NewObject<UListDataObject_Collection>();
+			SoundCategoryCollection->SetDataID(FName("SoundCategoryCollection"));
+			SoundCategoryCollection->SetDataDisplayName(FText::FromString(TEXT("Sound")));
+			AudioTabCollection->AddChildListData(SoundCategoryCollection);
+
+			//允许背景音乐
+			{
+				UListDataObject_StringBool* AllowBackgroundAudio = NewObject<UListDataObject_StringBool>();
+				AllowBackgroundAudio->SetDataID(FName("AllowBackgroundAudio"));
+				AllowBackgroundAudio->SetDataDisplayName(FText::FromString(TEXT("Allow Background Audio")));
+				AllowBackgroundAudio->OverrideTrueDisplayText(FText::FromString(TEXT("Enabled")));
+				AllowBackgroundAudio->OverrideFalseDisplayText(FText::FromString(TEXT("Disabled")));
+				AllowBackgroundAudio->SetFalseAsDefaultValue();
+				AllowBackgroundAudio->SetDataDynamicGetter(MAKE_OPTIONS_DATA_CONTROL(GetAllowBackgroundAudio));
+				AllowBackgroundAudio->SetDataDynamicSetter(MAKE_OPTIONS_DATA_CONTROL(SetAllowBackgroundAudio));
+				AllowBackgroundAudio->SetShouldApplySettingsImmediately(true);
+
+				SoundCategoryCollection->AddChildListData(AllowBackgroundAudio);
+			}
+			//启用HDR音频
+			{
+				UListDataObject_StringBool* UseHDRAudioMode = NewObject<UListDataObject_StringBool>();
+				UseHDRAudioMode->SetDataID(FName("UseHDRAudioMode"));
+				UseHDRAudioMode->SetDataDisplayName(FText::FromString(TEXT("Use HDR Audio Mode")));
+				UseHDRAudioMode->OverrideTrueDisplayText(FText::FromString(TEXT("Enabled")));
+				UseHDRAudioMode->OverrideFalseDisplayText(FText::FromString(TEXT("Disabled")));
+				UseHDRAudioMode->SetFalseAsDefaultValue();
+				UseHDRAudioMode->SetDataDynamicGetter(MAKE_OPTIONS_DATA_CONTROL(GetUseHDRAudioMode));
+				UseHDRAudioMode->SetDataDynamicSetter(MAKE_OPTIONS_DATA_CONTROL(SetUseHDRAudioMode));
+				UseHDRAudioMode->SetShouldApplySettingsImmediately(true);
+
+				SoundCategoryCollection->AddChildListData(UseHDRAudioMode);
+			}
+		}
+	}
 	RegisteredOptionsTabCollections.Add(AudioTabCollection);
 }
 /**
