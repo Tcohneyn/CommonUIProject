@@ -51,7 +51,7 @@ class COMMONUIPROJECT_API UWidget_ConfirmScreen : public UWidget_ActivatableBase
 	GENERATED_BODY()
 
 public:
-	//Gets called outside of the class when this widget is contructed and before it's pushed to the modal stack
+	// 在类外部，当此Widget被构建后、被推入模态栈之前调用
 	void InitConfirmScreen(UConfirmScreenInfoObject* InScreenInfoObject,TFunction<void(EConfirmScreenButtonType)> ClickedButtonCallback);
 	
 private:

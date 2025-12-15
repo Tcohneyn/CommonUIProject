@@ -24,6 +24,8 @@ protected:
 	virtual void OnDataObjectInitialized() override;
 	virtual bool CanResetBackToDefaultValue() const override;
 	virtual bool TryResetBackToDefaultValue() override;
+	virtual bool CanSetToForcedStringValue(const FString& InForcedValue) const override;
+	virtual void OnSetToForcedStringValue(const FString& InForcedValue) override;
 	//~ End UListDataObject_Base Interface
 	
 	bool TrySetDisplayTextFromStringValue(const FString& InStringValue);
@@ -59,4 +61,53 @@ private:
 
 	const FString TrueString = TEXT("true");
 	const FString FalseString = TEXT("false");
+};
+
+UCLASS()
+class COMMONUIPROJECT_API UListDataObject_StringEnum : public UListDataObject_String
+{
+	GENERATED_BODY()
+
+public:
+	//7.4 此函数用于将一个枚举值及其显示文本添加到设置选项列表中
+	template<typename EnumType>
+	void AddEnumOption(EnumType InEnumOption, const FText& InDisplayText)
+	{
+		const UEnum* StaticEnumOption = StaticEnum<EnumType>();
+		const FString ConvertedEnumString = StaticEnumOption->GetNameStringByValue(InEnumOption);
+
+		AddDynamicOption(ConvertedEnumString,InDisplayText);
+	}
+    //7.4 此函数用于将当前选中的字符串值转换回对应的枚举值。
+	template<typename EnumType>
+	EnumType GetCurrentValueAsEnum() const
+	{
+		const UEnum* StaticEnumOption = StaticEnum<EnumType>();
+
+		return (EnumType)StaticEnumOption->GetValueByNameString(CurrentStringValue);
+	}
+    //7.4 此函数用于将一个枚举值设置为该设置的默认值。
+	template<typename EnumType>
+	void SetDefaultValueFromEnumOption(EnumType InEnumOption)
+	{
+		const UEnum* StaticEnumOption = StaticEnum<EnumType>();
+		const FString ConvertedEnumString = StaticEnumOption->GetNameStringByValue(InEnumOption);
+
+		SetDefaultValueFromString(ConvertedEnumString);
+	}
+};
+
+UCLASS()
+class COMMONUIPROJECT_API UListDataObject_StringInteger : public UListDataObject_String
+{
+	GENERATED_BODY()
+
+public:
+	void AddIntegerOption(int32 InIntegerValue,const FText& InDisplayText);
+
+protected:
+	//~ Begin UListDataObject_String Interface
+	virtual void OnDataObjectInitialized() override;
+	virtual void OnEditDependencyDataModified(UListDataObject_Base* ModifiedDependencyData,EOptionsListDataModifyReason ModifyReason) override;
+	//~ End UListDataObject_String Interface
 };

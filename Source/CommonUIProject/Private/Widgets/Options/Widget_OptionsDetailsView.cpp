@@ -40,7 +40,7 @@ void UWidget_OptionsDetailsView::UpdateDetailsViewInfo(UListDataObject_Base* InD
 	CommonRichText_DynamicDetails->SetText(FText::FromString(DynamicDetails));
 
 	// 设置禁用原因提示：当选项被禁用时，显示原因（例如"需要先完成前置任务"）
-	CommonRichText_DisabledReason->SetText(InDataObject->GetDisabledRichText());
+	CommonRichText_DisabledReason->SetText(InDataObject->IsDataCurrentlyEditable()? FText::GetEmpty() : InDataObject->GetDisabledRichText());
 }
 //清空详情视图信息
 void UWidget_OptionsDetailsView::ClearDetailsViewInfo()

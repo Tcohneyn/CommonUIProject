@@ -10,7 +10,7 @@
 
 void UWidget_ListEntry_Base::NativeOnListEntryWidgetHovered(bool bWasHovered)
 {
-	BP_OnListEntryWidgetHovered(bWasHovered,IsListItemSelected());
+	BP_OnListEntryWidgetHovered(bWasHovered, GetListItem()? IsListItemSelected() : false);
 }
 
 void UWidget_ListEntry_Base::NativeOnListItemObjectSet(UObject* ListItemObject)
@@ -71,12 +71,36 @@ void UWidget_ListEntry_Base::OnOwningListDataObjectSet(UListDataObject_Base* InO
 	{
 		InOwningListDataObject->OnListDataModified.AddUObject(this,&ThisClass::OnOwningListDataObjectModified);
 	}
+	if (!InOwningListDataObject->OnDependencyDataModified.IsBoundToObject(this))
+	{
+		InOwningListDataObject->OnDependencyDataModified.AddUObject(this,&ThisClass::OnOwningDependencyDataObjectModified);
+	}
+	OnToggleEditableState(InOwningListDataObject->IsDataCurrentlyEditable());
+	CachedOwningDataObject = InOwningListDataObject;
 }
 
 void UWidget_ListEntry_Base::OnOwningListDataObjectModified(UListDataObject_Base* OwningModifiedData,
 	EOptionsListDataModifyReason ModifyReason)
 {
 }
+
+void UWidget_ListEntry_Base::OnOwningDependencyDataObjectModified(UListDataObject_Base* OwningModifiedDependencyData,
+	EOptionsListDataModifyReason ModifyReason)
+{
+	if (CachedOwningDataObject)
+	{
+		OnToggleEditableState(CachedOwningDataObject->IsDataCurrentlyEditable());
+	}
+}
+
+void UWidget_ListEntry_Base::OnToggleEditableState(bool bIsEditable)
+{
+	if (CommonText_SettingDisplayName)
+	{
+		CommonText_SettingDisplayName->SetIsEnabled(bIsEditable);
+	}
+}
+
 void UWidget_ListEntry_Base::SelectThisEntryWidget()
 {
 	CastChecked<UListView>(GetOwningListView())->SetSelectedItem(GetListItem());

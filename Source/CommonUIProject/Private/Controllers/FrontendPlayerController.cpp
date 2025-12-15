@@ -4,6 +4,7 @@
 #include "Controllers/FrontendPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/CameraActor.h"
+#include "FrontendSettings/FrontendGameUserSettings.h"
 // 当此PlayerController获得对一个Pawn的控制权时调用
 void AFrontendPlayerController::OnPossess(APawn* aPawn)
 {
@@ -25,4 +26,14 @@ void AFrontendPlayerController::OnPossess(APawn* aPawn)
 		SetViewTarget(FoundCameras[0]);
 	}
 	// 如果没有找到标记为"Default"的摄像机，则不会进行视角切换，可能会保持引擎默认视角或之前设置的视角
+	UFrontendGameUserSettings* GameUserSettings = UFrontendGameUserSettings::Get();
+	// 检查是否已保存有效的CPU/GPU基准测试结果
+	// 如果任意一个结果为-1（表示从未运行过基准测试或结果无效）
+	if (GameUserSettings->GetLastCPUBenchmarkResult() == -1.f || GameUserSettings->GetLastGPUBenchmarkResult() == -1.f)
+	{
+		// 运行硬件性能基准测试
+		GameUserSettings->RunHardwareBenchmark();
+		// 应用基准测试结果（通常会根据性能自动调整图形设置）
+		GameUserSettings->ApplyHardwareBenchmarkResults();
+	}
 }

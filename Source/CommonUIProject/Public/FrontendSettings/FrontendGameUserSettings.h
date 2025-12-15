@@ -9,6 +9,7 @@
 /**
  * 
  */
+
 UCLASS()
 class COMMONUIPROJECT_API UFrontendGameUserSettings : public UGameUserSettings
 {
@@ -27,6 +28,8 @@ public:
 	//***** Gameplay Collection Tab ***** //
 
 	//***** Audio Collection Tab ***** //
+
+	
 	UFUNCTION()
 	float GetOverallVolume() const { return OverallVolume;}
 
@@ -57,6 +60,15 @@ public:
 	UFUNCTION()
 	void SetUseHDRAudioMode(bool bIsAllowed);
 	//***** Audio Collection Tab ***** //
+
+	//***** Video Collection Tab ***** //
+	UFUNCTION()
+	float GetCurrentDisplayGamma() const;
+
+	UFUNCTION()
+	void SetCurrentDisplayGamma(float InNewGamma);
+
+	//***** Video Collection Tab ***** //
 private:
 	//***** Gameplay Collection Tab ***** //
 	UPROPERTY(Config)

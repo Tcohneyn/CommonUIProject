@@ -42,10 +42,18 @@ protected:
 	//子类应重写此函数，以便在数据对象被修改后更新UI值。无需调用父类方法（Super
 	virtual void OnOwningListDataObjectModified(UListDataObject_Base* OwningModifiedData,EOptionsListDataModifyReason ModifyReason);
 
+	virtual void OnOwningDependencyDataObjectModified(UListDataObject_Base* OwningModifiedDependencyData,EOptionsListDataModifyReason ModifyReason);
+	
+	// 子类应重写此方法，以更改其拥有的小部件的可编辑状态。期望调用父类方法（Super）
+	virtual void OnToggleEditableState(bool bIsEditable);
+	
 	void SelectThisEntryWidget();
 private:
 	//***** Bound Widgets ***** //
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional,AllowPrivateAccess = "true"))
 	UCommonTextBlock* CommonText_SettingDisplayName;
 	//***** Bound Widgets ***** //
+
+	UPROPERTY(Transient)
+	UListDataObject_Base* CachedOwningDataObject;
 };
