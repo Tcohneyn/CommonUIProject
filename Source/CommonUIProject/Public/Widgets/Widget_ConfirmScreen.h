@@ -53,7 +53,11 @@ class COMMONUIPROJECT_API UWidget_ConfirmScreen : public UWidget_ActivatableBase
 public:
 	// 在类外部，当此Widget被构建后、被推入模态栈之前调用
 	void InitConfirmScreen(UConfirmScreenInfoObject* InScreenInfoObject,TFunction<void(EConfirmScreenButtonType)> ClickedButtonCallback);
-	
+
+protected:
+	//~ Begin UCommonActivatableWidget Interface
+	virtual UWidget* NativeGetDesiredFocusTarget() const override;
+	//~ End UCommonActivatableWidget Interface
 private:
 	UPROPERTY(meta = (BindWidget))
 	UCommonTextBlock* CommonTextBlock_Title;

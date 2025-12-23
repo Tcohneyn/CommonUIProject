@@ -21,6 +21,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FText GetButtonDisplayText() const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetButtionDisplayImage(const FSlateBrush& InBrush);
 private:
 	//~ Begin UUserWidget Interface
 	virtual void NativePreConstruct() override;
@@ -35,7 +38,7 @@ private:
 	//**** Bound Widgets ****//
 	UPROPERTY(meta = (BindWidgetOptional))
 	UCommonTextBlock* CommonTextBlock_ButtonText;
-
+	
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional,AllowPrivateAccess = "true"))
 	UCommonLazyImage* CommonLazyImage_ButtonImage;
 	//**** Bound Widgets ****//

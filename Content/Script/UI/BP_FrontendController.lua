@@ -11,7 +11,16 @@ local M = UnLua.Class()
 
 -- 重写UE的ReceivePossess事件函数，当此PlayerController获得对一个Pawn的控制权时自动调用
 function M:ReceivePossess(aPawn)
-    -- 1. 同步加载并创建主布局UI控件
+   self:Sequence()
+end
+
+function M:Sequence()
+   self:Task()
+   self:Task1()
+end
+
+function M:Task()
+       -- 1. 同步加载并创建主布局UI控件
     -- 使用UE的反射系统，根据路径加载UI控件蓝图类（WBP_CUW_PrimaryLayout）
     local UMG_C = UE.UClass.Load("/Game/UI/Widgets/WBP_CUW_PrimaryLayout.WBP_CUW_PrimaryLayout_C")
     -- 利用加载到的控件类，创建出一个实际的控件实例。`self`作为创建者（Owning Player），`self`也作为外部对象（Outer）
@@ -49,6 +58,10 @@ function M:ReceivePossess(aPawn)
             print("Failed to load WidgetClass")
         end
     end
+end
+
+function M:Task1()
+    local bool = UE.UFrontendFunctionLibrary.GetRegisterInputMappingContext(self,self.IMC)
 end
 
 -- 异步推送任务的自定义回调函数

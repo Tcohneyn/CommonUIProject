@@ -27,7 +27,7 @@ private:
 	void InitGameplayCollectionTab();
 	void InitAudioCollectionTab();
 	void InitVideoCollectionTab();
-	void InitControlCollectionTab();
+	void InitControlCollectionTab(ULocalPlayer* InOwningLocalPlayer);
 
 	UPROPERTY(Transient) //属性是临时的，这意味着它不会被保存或加载。以这种方式标记的属性在加载时将被清零
 	TArray<UListDataObject_Collection*> RegisteredOptionsTabCollections;

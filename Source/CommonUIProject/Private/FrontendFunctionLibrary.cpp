@@ -2,7 +2,10 @@
 
 
 #include "FrontendFunctionLibrary.h"
+
+#include "EnhancedInputSubsystems.h"
 #include "FrontendSettings/FrontendDeveloperSettings.h"
+#include "UserSettings/EnhancedInputUserSettings.h"
 
 // 函数功能：通过游戏标签获取前端控件类的软引用
 // 此函数标记为BlueprintPure，意味着它是纯函数（无副作用），可在蓝图中作为纯节点使用
@@ -44,4 +47,17 @@ TSoftObjectPtr<UTexture2D> UFrontendFunctionLibrary::GetOptionsSoftImageByTag(FG
 	// 使用FindRef方法从映射表中查找并返回对应的软引用纹理
 	// FindRef在键不存在时会返回空值而非崩溃，与checkf配合使用既安全又严格
 	return FrontendDeveloperSettings->OptionsScreenSoftImageMap.FindRef(InImageTag);
+}
+
+//获取增强输入本地玩家子系统
+bool UFrontendFunctionLibrary::GetRegisterInputMappingContext(APlayerController* Controller,UInputMappingContext* IMC)
+{
+	// 获取本地玩家
+	ULocalPlayer* LocalPlayer = Controller->GetLocalPlayer();
+
+	// 获取增强输入本地玩家子系统
+	auto Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer);
+    UEnhancedInputUserSettings* UserSettings = Subsystem->GetUserSettings();
+	
+	return UserSettings->RegisterInputMappingContext(IMC);;
 }

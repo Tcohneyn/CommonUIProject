@@ -11,6 +11,15 @@
 void UWidget_ListEntry_Base::NativeOnListEntryWidgetHovered(bool bWasHovered)
 {
 	BP_OnListEntryWidgetHovered(bWasHovered, GetListItem()? IsListItemSelected() : false);
+	
+	if (bWasHovered)
+	{
+		BP_OnToggleEntryWidgetHighlightState(true);
+	}
+	else
+	{	
+		BP_OnToggleEntryWidgetHighlightState(GetListItem() && IsListItemSelected()? true : false);
+	}
 }
 
 void UWidget_ListEntry_Base::NativeOnListItemObjectSet(UObject* ListItemObject)
@@ -20,6 +29,13 @@ void UWidget_ListEntry_Base::NativeOnListItemObjectSet(UObject* ListItemObject)
 	//SetVisibility(ESlateVisibility::Visible);
 	
 	OnOwningListDataObjectSet(CastChecked<UListDataObject_Base>(ListItemObject));
+}
+
+void UWidget_ListEntry_Base::NativeOnItemSelectionChanged(bool bIsSelected)
+{
+	IUserObjectListEntry::NativeOnItemSelectionChanged(bIsSelected);
+
+	BP_OnToggleEntryWidgetHighlightState(bIsSelected);
 }
 
 // 当列表条目被释放时由系统自动调用（例如：条目被滚动出屏幕，或列表被刷新/重置）
