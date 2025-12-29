@@ -22,15 +22,21 @@ function M:Construct()
     else
         print("[Lua] Story button is nil!")
     end
-        if self.Button_Option then
+    if self.Button_Option then
         self.Button_Option.OnButtonBaseClicked:Add(self, M.OnButtonClicked_Option)
     else
         print("[Lua] Story button is nil!")
+    end
+    if self.Button_Credit then
+        self.Button_Credit.OnButtonBaseClicked:Add(self, M.OnButtonClicked_Credit)
+    else
+        print("[Lua] Credit button is nil!")
     end
 end
 
 -- Quit 按钮
 function M:OnButtonClicked_Quit()
+    self:SwitchCameraByTagWithBlend("Quit", 1.0, UE.EViewTargetBlendFunction.VTBlend_Cubic, 0.5)
     local Task = UE.UAsyncAction_PushConfirmScreen.PushConfirmScreen(
         self,
         self.ScreenType,
@@ -48,11 +54,11 @@ end
 
 -- 确认框回调
 function M:OnConfirmScreenClicked(ButtonType)
--- 获取本地玩家的 CommonInputSubsystem 实例
-local InputSubsystem = self:GetInputSubsystem()
+    -- 获取本地玩家的 CommonInputSubsystem 实例
+    local InputSubsystem = self:GetInputSubsystem()
     if ButtonType == UE.EConfirmScreenButtonType.Confirmed then
         if (InputSubsystem:GetCurrentInputType() == UE.ECommonInputType.Gamepad) then
-            InputSubsystem:SetCurrentInputType( UE.ECommonInputType.Keyboard)
+            InputSubsystem:SetCurrentInputType(UE.ECommonInputType.Keyboard)
             UE.UKismetSystemLibrary.QuitGame(self, nil, UE.EQuitPreference.Quit, false)
         else
             print("[Lua] Keyboard confirmed exit")
@@ -60,14 +66,15 @@ local InputSubsystem = self:GetInputSubsystem()
         end
     elseif ButtonType == UE.EConfirmScreenButtonType.Cancelled then
         print("[Lua] Quit canceled by user")
+        self:SwitchCameraByTagWithBlend("Default", 1.0, UE.EViewTargetBlendFunction.VTBlend_Cubic, 0.5)
     else
         print("[Lua] Other confirm dialog result: " .. tostring(ButtonType))
+        self:SwitchCameraByTagWithBlend("Default", 1.0, UE.EViewTargetBlendFunction.VTBlend_Cubic, 0.5)
     end
 end
 
 -- Story 按钮
 function M:OnButtonClicked_Story()
-
     local OwningPC = self:GetOwningFrontendPlayerController()
     --print("[Lua] OwningPC = " .. tostring(OwningPC))
 
@@ -84,7 +91,7 @@ function M:OnButtonClicked_Story()
         )
         if Task then
             print("[Lua] Soft widget task created")
-            Task.OnWidgetCreatedBeforePush:Add(self, M.OnWidgetPushed)
+            Task.OnWidgetCreatedBeforePush:Add(self, M.OnWidgetPushed_Story)
             Task:Activate()
         else
             print("[Lua] Failed to create push soft widget task")
@@ -96,7 +103,6 @@ end
 
 -- Options 按钮
 function M:OnButtonClicked_Option()
-
     local OwningPC = self:GetOwningFrontendPlayerController()
     --print("[Lua] OwningPC = " .. tostring(OwningPC))
 
@@ -113,7 +119,7 @@ function M:OnButtonClicked_Option()
         )
         if Task then
             print("[Lua] Soft widget task created")
-            Task.OnWidgetCreatedBeforePush:Add(self, M.OnWidgetPushed)
+            Task.OnWidgetCreatedBeforePush:Add(self, M.OnWidgetPushed_Option)
             Task:Activate()
         else
             print("[Lua] Failed to create push soft widget task")
@@ -123,8 +129,46 @@ function M:OnButtonClicked_Option()
     end
 end
 
+function M:OnButtonClicked_Credit()
+    local OwningPC = self:GetOwningFrontendPlayerController()
+    local WidgetClass = UE.UFrontendFunctionLibrary.GetFrontendSoftWidgetClassByTag(self.InWidgetTag2)
+    if WidgetClass then
+        local Task = UE.UAsyncAction_PushSoftWidget.PushSoftWidget(
+            self,
+            OwningPC,
+            WidgetClass,
+            self.InWidgetStackTag,
+            true
+        )
+        if Task then
+            print("[Lua] Soft widget task created")
+            Task.OnWidgetCreatedBeforePush:Add(self, M.OnWidgetPushed_Credit)
+            Task:Activate()
+        else
+            print("[Lua] Failed to create push soft widget task")
+        end
+    else
+        print("[Lua] Failed to load WidgetClass for Credit")
+    end
+end
+
 -- Widget 推入回调
-function M:OnWidgetPushed(Widget)
+function M:OnWidgetPushed_Story(Widget)
+    print("[Lua] Widget pushed: " .. tostring(Widget))
+    self:SwitchCameraByTagWithBlend("Story", 1.0, UE.EViewTargetBlendFunction.VTBlend_Cubic, 0.5)
+end
+
+function M:OnWidgetPushed_Option(Widget)
+    print("[Lua] Widget pushed: " .. tostring(Widget))
+    self:SwitchCameraByTagWithBlend("Options", 1.0, UE.EViewTargetBlendFunction.VTBlend_Cubic, 0.5)
+end
+
+function M:OnWidgetPushed_Credit(Widget)
+    print("[Lua] Widget pushed: " .. tostring(Widget))
+    self:SwitchCameraByTagWithBlend("Credit", 1.0, UE.EViewTargetBlendFunction.VTBlend_Cubic, 0.5)
+end
+
+function M:OnWidgetPushed_Quit(Widget)
     print("[Lua] Widget pushed: " .. tostring(Widget))
 end
 

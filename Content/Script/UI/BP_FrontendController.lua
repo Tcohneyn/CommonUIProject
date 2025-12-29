@@ -10,7 +10,7 @@
 local M = UnLua.Class()
 
 -- 重写UE的ReceivePossess事件函数，当此PlayerController获得对一个Pawn的控制权时自动调用
-function M:ReceivePossess(aPawn)
+function M:OnLoadingScreenDeactivated()
    self:Sequence()
 end
 
